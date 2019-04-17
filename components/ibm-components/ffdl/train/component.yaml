@@ -16,10 +16,22 @@ description: |
 metadata:
   labels: {platform: 'Open Source'}
 inputs:
-  - {name: model_def_file_path, description: 'Required. Path for model training code in object storage'}
-  - {name: manifest_file_path,  description: 'Required. Path for model manifest definition in object storage'}
+  - {name: model_def_file_path,             description: 'Required. Path for model training code in object storage'}
+  - {name: manifest_file_path,              description: 'Path for model manifest definition if it is in object storage', default: ''}
+  - {name: training_job_name,               description: 'Name of the training job', default: 'training job'}
+  - {name: training_job_description,        description: 'Description of the training job', default: 'Training ML/DL model'}
+  - {name: training_job_version,            description: 'Version of the training job', default: '1.0'}
+  - {name: training_job_gpus,               description: 'Number of gpus for the training job', default: '0'}
+  - {name: training_job_cpus,               description: 'Number of cpus for the training job', default: '1.0'}
+  - {name: training_job_learners,           description: 'Number of learners for the training job', default: '1'}
+  - {name: training_job_memory,             description: 'Amount of memory for the training job', default: '1Gb'}
+  - {name: training_job_framework_name,     description: 'ML/DL Framework name for the training job', default: 'tensorflow'}
+  - {name: training_job_framework_version,  description: 'ML/DL Framework version for the training job', default: 'latest'}
+  - {name: training_job_command,            description: 'Exuecution command for the training job', default: 'echo command not defined'}
+  - {name: training_job_metric_type,        description: 'Metric storing type for the training job', default: 'tensorboard'}
+  - {name: training_job_metric_path,        description: 'Metric storing path for the training job', default: '$JOB_STATE_DIR/logs/tb'}
 outputs:
-  - {name: output,              description: 'Model training_id'}
+  - {name: output,                          description: 'Model training_id'}
 implementation:
   container:
     image: docker.io/aipipeline/ffdl-train:latest
@@ -27,7 +39,19 @@ implementation:
     args: [
       -u, train.py,
       --model_def_file_path, {inputValue: model_def_file_path},
-      --manifest_file_path, {inputValue: manifest_file_path}
+      --manifest_file_path, {inputValue: manifest_file_path},
+      --training_job_name, {inputValue: training_job_name},
+      --training_job_description, {inputValue: training_job_description},
+      --training_job_version, {inputValue: training_job_version},
+      --training_job_gpus, {inputValue: training_job_gpus},
+      --training_job_cpus, {inputValue: training_job_cpus},
+      --training_job_learners, {inputValue: training_job_learners},
+      --training_job_memory, {inputValue: training_job_memory},
+      --training_job_framework_name, {inputValue: training_job_framework_name},
+      --training_job_framework_version, {inputValue: training_job_framework_version},
+      --training_job_command, {inputValue: training_job_command},
+      --training_job_metric_type, {inputValue: training_job_metric_type},
+      --training_job_metric_path, {inputValue: training_job_metric_path}
     ]
     fileOutputs:
       output: /tmp/training_id.txt
