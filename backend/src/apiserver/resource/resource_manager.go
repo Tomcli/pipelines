@@ -336,7 +336,7 @@ func (r *ResourceManager) CreateRun(apiRun *api.Run) (*model.RunDetail, error) {
 		return nil, util.Wrap(err, "Failed to verify parameters.")
 	}
 
-	r.setDefaultServiceAccount(&workflow)
+	r.setDefaultServiceAccount(&workflow, apiRun.GetServiceAccount())
 
 	// Disable istio sidecar injection
 	workflow.SetAnnotationsToAllTemplates(util.AnnotationKeyIstioSidecarInject, util.AnnotationValueIstioSidecarInjectDisabled)
@@ -589,7 +589,7 @@ func (r *ResourceManager) CreateJob(apiJob *api.Job) (*model.Job, error) {
 		return nil, util.Wrap(err, "Create job failed")
 	}
 
-	r.setDefaultServiceAccount(&workflow)
+	r.setDefaultServiceAccount(&workflow, apiJob.GetServiceAccount())
 
 	// Disable istio sidecar injection
 	workflow.SetAnnotationsToAllTemplates(util.AnnotationKeyIstioSidecarInject, util.AnnotationValueIstioSidecarInjectDisabled)
@@ -1112,7 +1112,11 @@ func (r *ResourceManager) GetNamespaceFromJobID(jobId string) (string, error) {
 	return job.Namespace, nil
 }
 
-func (r *ResourceManager) setDefaultServiceAccount(workflow *util.Workflow) {
+func (r *ResourceManager) setDefaultServiceAccount(workflow *util.Workflow, serviceAccount string) {
+	if len(serviceAccount) > 0 {
+		workflow.SetServiceAccount(serviceAccount)
+		return
+	}
 	workflowServiceAccount := workflow.Spec.ServiceAccountName
 	if len(workflowServiceAccount) == 0 || workflowServiceAccount == defaultPipelineRunnerServiceAccount {
 		// To reserve SDK backward compatibility, the backend only replaces
