@@ -14,149 +14,149 @@
 
 package resource
 
-import (
-	"github.com/golang/glog"
-	"github.com/kubeflow/pipelines/backend/src/apiserver/client"
-	"github.com/kubeflow/pipelines/backend/src/apiserver/storage"
-	"github.com/kubeflow/pipelines/backend/src/common/util"
-)
+// import (
+// 	"github.com/golang/glog"
+// 	"github.com/kubeflow/pipelines/backend/src/apiserver/client"
+// 	"github.com/kubeflow/pipelines/backend/src/apiserver/storage"
+// 	"github.com/kubeflow/pipelines/backend/src/common/util"
+// )
 
-const (
-	DefaultFakeUUID = "123e4567-e89b-12d3-a456-426655440000"
-	FakeUUIDOne     = "123e4567-e89b-12d3-a456-426655440001"
-)
+// const (
+// 	DefaultFakeUUID = "123e4567-e89b-12d3-a456-426655440000"
+// 	FakeUUIDOne     = "123e4567-e89b-12d3-a456-426655440001"
+// )
 
-type FakeClientManager struct {
-	db                     *storage.DB
-	experimentStore        storage.ExperimentStoreInterface
-	pipelineStore          storage.PipelineStoreInterface
-	jobStore               storage.JobStoreInterface
-	runStore               storage.RunStoreInterface
-	resourceReferenceStore storage.ResourceReferenceStoreInterface
-	dBStatusStore          storage.DBStatusStoreInterface
-	defaultExperimentStore storage.DefaultExperimentStoreInterface
-	objectStore            storage.ObjectStoreInterface
-	ArgoClientFake         *client.FakeArgoClient
-	swfClientFake          *client.FakeSwfClient
-	k8sCoreClientFake      *client.FakeKuberneteCoreClient
-	KfamClientFake         client.KFAMClientInterface
-	time                   util.TimeInterface
-	uuid                   util.UUIDGeneratorInterface
-}
+// type FakeClientManager struct {
+// 	db                     *storage.DB
+// 	experimentStore        storage.ExperimentStoreInterface
+// 	pipelineStore          storage.PipelineStoreInterface
+// 	jobStore               storage.JobStoreInterface
+// 	runStore               storage.RunStoreInterface
+// 	resourceReferenceStore storage.ResourceReferenceStoreInterface
+// 	dBStatusStore          storage.DBStatusStoreInterface
+// 	defaultExperimentStore storage.DefaultExperimentStoreInterface
+// 	objectStore            storage.ObjectStoreInterface
+// 	ArgoClientFake         *client.FakeArgoClient
+// 	swfClientFake          *client.FakeSwfClient
+// 	k8sCoreClientFake      *client.FakeKuberneteCoreClient
+// 	KfamClientFake         client.KFAMClientInterface
+// 	time                   util.TimeInterface
+// 	uuid                   util.UUIDGeneratorInterface
+// }
 
-func NewFakeClientManager(time util.TimeInterface, uuid util.UUIDGeneratorInterface) (
-	*FakeClientManager, error) {
+// func NewFakeClientManager(time util.TimeInterface, uuid util.UUIDGeneratorInterface) (
+// 	*FakeClientManager, error) {
 
-	if time == nil {
-		glog.Fatalf("The time parameter must not be null.") // Must never happen
-	}
+// 	if time == nil {
+// 		glog.Fatalf("The time parameter must not be null.") // Must never happen
+// 	}
 
-	if uuid == nil {
-		glog.Fatalf("The UUID generator must not be null.") // Must never happen
-	}
+// 	if uuid == nil {
+// 		glog.Fatalf("The UUID generator must not be null.") // Must never happen
+// 	}
 
-	// Initialize GORM
-	db, err := storage.NewFakeDb()
-	if err != nil {
-		return nil, err
-	}
+// 	// Initialize GORM
+// 	db, err := storage.NewFakeDb()
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// TODO(neuromage): Pass in metadata.Store instance for tests as well.
-	return &FakeClientManager{
-		db:                     db,
-		experimentStore:        storage.NewExperimentStore(db, time, uuid),
-		pipelineStore:          storage.NewPipelineStore(db, time, uuid),
-		jobStore:               storage.NewJobStore(db, time),
-		runStore:               storage.NewRunStore(db, time),
-		ArgoClientFake:         client.NewFakeArgoClient(),
-		resourceReferenceStore: storage.NewResourceReferenceStore(db),
-		dBStatusStore:          storage.NewDBStatusStore(db),
-		defaultExperimentStore: storage.NewDefaultExperimentStore(db),
-		objectStore:            storage.NewFakeObjectStore(),
-		swfClientFake:          client.NewFakeSwfClient(),
-		k8sCoreClientFake:      client.NewFakeKuberneteCoresClient(),
-		KfamClientFake:         client.NewFakeKFAMClientAuthorized(),
-		time:                   time,
-		uuid:                   uuid,
-	}, nil
-}
+// 	// TODO(neuromage): Pass in metadata.Store instance for tests as well.
+// 	return &FakeClientManager{
+// 		db:                     db,
+// 		experimentStore:        storage.NewExperimentStore(db, time, uuid),
+// 		pipelineStore:          storage.NewPipelineStore(db, time, uuid),
+// 		jobStore:               storage.NewJobStore(db, time),
+// 		runStore:               storage.NewRunStore(db, time),
+// 		ArgoClientFake:         client.NewFakeArgoClient(),
+// 		resourceReferenceStore: storage.NewResourceReferenceStore(db),
+// 		dBStatusStore:          storage.NewDBStatusStore(db),
+// 		defaultExperimentStore: storage.NewDefaultExperimentStore(db),
+// 		objectStore:            storage.NewFakeObjectStore(),
+// 		swfClientFake:          client.NewFakeSwfClient(),
+// 		k8sCoreClientFake:      client.NewFakeKuberneteCoresClient(),
+// 		KfamClientFake:         client.NewFakeKFAMClientAuthorized(),
+// 		time:                   time,
+// 		uuid:                   uuid,
+// 	}, nil
+// }
 
-func NewFakeClientManagerOrFatal(time util.TimeInterface) *FakeClientManager {
-	uuid := util.NewFakeUUIDGeneratorOrFatal(DefaultFakeUUID, nil)
-	fakeStore, err := NewFakeClientManager(time, uuid)
-	if err != nil {
-		glog.Fatalf("The fake store doesn't create successfully. Fail fast.")
-	}
-	return fakeStore
-}
+// func NewFakeClientManagerOrFatal(time util.TimeInterface) *FakeClientManager {
+// 	uuid := util.NewFakeUUIDGeneratorOrFatal(DefaultFakeUUID, nil)
+// 	fakeStore, err := NewFakeClientManager(time, uuid)
+// 	if err != nil {
+// 		glog.Fatalf("The fake store doesn't create successfully. Fail fast.")
+// 	}
+// 	return fakeStore
+// }
 
-func (f *FakeClientManager) ExperimentStore() storage.ExperimentStoreInterface {
-	return f.experimentStore
-}
+// func (f *FakeClientManager) ExperimentStore() storage.ExperimentStoreInterface {
+// 	return f.experimentStore
+// }
 
-func (f *FakeClientManager) PipelineStore() storage.PipelineStoreInterface {
-	return f.pipelineStore
-}
+// func (f *FakeClientManager) PipelineStore() storage.PipelineStoreInterface {
+// 	return f.pipelineStore
+// }
 
-func (f *FakeClientManager) ObjectStore() storage.ObjectStoreInterface {
-	return f.objectStore
-}
+// func (f *FakeClientManager) ObjectStore() storage.ObjectStoreInterface {
+// 	return f.objectStore
+// }
 
-func (f *FakeClientManager) Time() util.TimeInterface {
-	return f.time
-}
+// func (f *FakeClientManager) Time() util.TimeInterface {
+// 	return f.time
+// }
 
-func (f *FakeClientManager) UUID() util.UUIDGeneratorInterface {
-	return f.uuid
-}
+// func (f *FakeClientManager) UUID() util.UUIDGeneratorInterface {
+// 	return f.uuid
+// }
 
-func (f *FakeClientManager) DB() *storage.DB {
-	return f.db
-}
+// func (f *FakeClientManager) DB() *storage.DB {
+// 	return f.db
+// }
 
-func (f *FakeClientManager) ArgoClient() client.ArgoClientInterface {
-	return f.ArgoClientFake
-}
+// func (f *FakeClientManager) ArgoClient() client.ArgoClientInterface {
+// 	return f.ArgoClientFake
+// }
 
-func (f *FakeClientManager) JobStore() storage.JobStoreInterface {
-	return f.jobStore
-}
+// func (f *FakeClientManager) JobStore() storage.JobStoreInterface {
+// 	return f.jobStore
+// }
 
-func (f *FakeClientManager) RunStore() storage.RunStoreInterface {
-	return f.runStore
-}
+// func (f *FakeClientManager) RunStore() storage.RunStoreInterface {
+// 	return f.runStore
+// }
 
-func (f *FakeClientManager) ResourceReferenceStore() storage.ResourceReferenceStoreInterface {
-	return f.resourceReferenceStore
-}
+// func (f *FakeClientManager) ResourceReferenceStore() storage.ResourceReferenceStoreInterface {
+// 	return f.resourceReferenceStore
+// }
 
-func (f *FakeClientManager) DBStatusStore() storage.DBStatusStoreInterface {
-	return f.dBStatusStore
-}
+// func (f *FakeClientManager) DBStatusStore() storage.DBStatusStoreInterface {
+// 	return f.dBStatusStore
+// }
 
-func (f *FakeClientManager) DefaultExperimentStore() storage.DefaultExperimentStoreInterface {
-	return f.defaultExperimentStore
-}
+// func (f *FakeClientManager) DefaultExperimentStore() storage.DefaultExperimentStoreInterface {
+// 	return f.defaultExperimentStore
+// }
 
-func (f *FakeClientManager) SwfClient() client.SwfClientInterface {
-	return f.swfClientFake
-}
+// func (f *FakeClientManager) SwfClient() client.SwfClientInterface {
+// 	return f.swfClientFake
+// }
 
-func (f *FakeClientManager) KubernetesCoreClient() client.KubernetesCoreInterface {
-	return f.k8sCoreClientFake
-}
+// func (f *FakeClientManager) KubernetesCoreClient() client.KubernetesCoreInterface {
+// 	return f.k8sCoreClientFake
+// }
 
-func (f *FakeClientManager) KFAMClient() client.KFAMClientInterface {
-	return f.KfamClientFake
-}
+// func (f *FakeClientManager) KFAMClient() client.KFAMClientInterface {
+// 	return f.KfamClientFake
+// }
 
-func (f *FakeClientManager) Close() error {
-	return f.db.Close()
-}
+// func (f *FakeClientManager) Close() error {
+// 	return f.db.Close()
+// }
 
-// Update the uuid used in this fake client manager
-func (f *FakeClientManager) UpdateUUID(uuid util.UUIDGeneratorInterface) {
-	f.uuid = uuid
-	f.experimentStore = storage.NewExperimentStore(f.db, f.time, uuid)
-	f.pipelineStore = storage.NewPipelineStore(f.db, f.time, uuid)
-}
+// // Update the uuid used in this fake client manager
+// func (f *FakeClientManager) UpdateUUID(uuid util.UUIDGeneratorInterface) {
+// 	f.uuid = uuid
+// 	f.experimentStore = storage.NewExperimentStore(f.db, f.time, uuid)
+// 	f.pipelineStore = storage.NewPipelineStore(f.db, f.time, uuid)
+// }

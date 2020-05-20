@@ -14,82 +14,82 @@
 
 package storage
 
-import (
-	"testing"
+// import (
+// 	"testing"
 
-	"github.com/stretchr/testify/assert"
-)
+// 	"github.com/stretchr/testify/assert"
+// )
 
-func TestInitializeDefaultExperimentTable(t *testing.T) {
-	db := NewFakeDbOrFatal()
-	defaultExperimentStore := NewDefaultExperimentStore(db)
+// func TestInitializeDefaultExperimentTable(t *testing.T) {
+// 	db := NewFakeDbOrFatal()
+// 	defaultExperimentStore := NewDefaultExperimentStore(db)
 
-	// Initialize for the first time
-	err := defaultExperimentStore.initializeDefaultExperimentTable()
-	assert.Nil(t, err)
-	// Initialize again should be no-op and no error
-	err = defaultExperimentStore.initializeDefaultExperimentTable()
-	assert.Nil(t, err)
-	// Default experiment ID is empty after table initialization
-	defaultExperimentId, err := defaultExperimentStore.GetDefaultExperimentId()
-	assert.Nil(t, err)
-	assert.Equal(t, "", defaultExperimentId)
+// 	// Initialize for the first time
+// 	err := defaultExperimentStore.initializeDefaultExperimentTable()
+// 	assert.Nil(t, err)
+// 	// Initialize again should be no-op and no error
+// 	err = defaultExperimentStore.initializeDefaultExperimentTable()
+// 	assert.Nil(t, err)
+// 	// Default experiment ID is empty after table initialization
+// 	defaultExperimentId, err := defaultExperimentStore.GetDefaultExperimentId()
+// 	assert.Nil(t, err)
+// 	assert.Equal(t, "", defaultExperimentId)
 
-	// Initializing the table with an invalid DB is an error
-	db.Close()
-	err = defaultExperimentStore.initializeDefaultExperimentTable()
-	assert.NotNil(t, err)
-}
+// 	// Initializing the table with an invalid DB is an error
+// 	db.Close()
+// 	err = defaultExperimentStore.initializeDefaultExperimentTable()
+// 	assert.NotNil(t, err)
+// }
 
-func TestGetAndSetDefaultExperimentId(t *testing.T) {
-	db := NewFakeDbOrFatal()
-	defaultExperimentStore := NewDefaultExperimentStore(db)
+// func TestGetAndSetDefaultExperimentId(t *testing.T) {
+// 	db := NewFakeDbOrFatal()
+// 	defaultExperimentStore := NewDefaultExperimentStore(db)
 
-	// Initialize for the first time
-	err := defaultExperimentStore.initializeDefaultExperimentTable()
-	assert.Nil(t, err)
-	// Set the default experiment ID
-	err = defaultExperimentStore.SetDefaultExperimentId("test-ID")
-	assert.Nil(t, err)
-	// Get the default experiment ID
-	defaultExperimentId, err := defaultExperimentStore.GetDefaultExperimentId()
-	assert.Nil(t, err)
-	assert.Equal(t, "test-ID", defaultExperimentId)
-	// Trying to set the default experiment ID again is not an error, but the ID is not changed
-	err = defaultExperimentStore.SetDefaultExperimentId("a-different-ID")
-	assert.Nil(t, err)
-	defaultExperimentId, err = defaultExperimentStore.GetDefaultExperimentId()
-	assert.Nil(t, err)
-	assert.Equal(t, "test-ID", defaultExperimentId)
+// 	// Initialize for the first time
+// 	err := defaultExperimentStore.initializeDefaultExperimentTable()
+// 	assert.Nil(t, err)
+// 	// Set the default experiment ID
+// 	err = defaultExperimentStore.SetDefaultExperimentId("test-ID")
+// 	assert.Nil(t, err)
+// 	// Get the default experiment ID
+// 	defaultExperimentId, err := defaultExperimentStore.GetDefaultExperimentId()
+// 	assert.Nil(t, err)
+// 	assert.Equal(t, "test-ID", defaultExperimentId)
+// 	// Trying to set the default experiment ID again is not an error, but the ID is not changed
+// 	err = defaultExperimentStore.SetDefaultExperimentId("a-different-ID")
+// 	assert.Nil(t, err)
+// 	defaultExperimentId, err = defaultExperimentStore.GetDefaultExperimentId()
+// 	assert.Nil(t, err)
+// 	assert.Equal(t, "test-ID", defaultExperimentId)
 
-	// Setting or getting the default experiment ID with an invalid DB is an error
-	db.Close()
-	err = defaultExperimentStore.SetDefaultExperimentId("some-ID")
-	assert.NotNil(t, err)
-	_, err = defaultExperimentStore.GetDefaultExperimentId()
-	assert.NotNil(t, err)
-}
+// 	// Setting or getting the default experiment ID with an invalid DB is an error
+// 	db.Close()
+// 	err = defaultExperimentStore.SetDefaultExperimentId("some-ID")
+// 	assert.NotNil(t, err)
+// 	_, err = defaultExperimentStore.GetDefaultExperimentId()
+// 	assert.NotNil(t, err)
+// }
 
-func TestUnsetDefaultExperimentIdIfIdMatches(t *testing.T) {
-	db := NewFakeDbOrFatal()
-	defaultExperimentStore := NewDefaultExperimentStore(db)
+// func TestUnsetDefaultExperimentIdIfIdMatches(t *testing.T) {
+// 	db := NewFakeDbOrFatal()
+// 	defaultExperimentStore := NewDefaultExperimentStore(db)
 
-	// Initialize for the first time
-	err := defaultExperimentStore.initializeDefaultExperimentTable()
-	assert.Nil(t, err)
-	// Set the default experiment ID
-	err = defaultExperimentStore.SetDefaultExperimentId("test-ID")
-	assert.Nil(t, err)
-	// Clear the default experiment ID. This requires a transaction.
-	tx, _ := db.Begin()
-	err = defaultExperimentStore.UnsetDefaultExperimentIdIfIdMatches(tx, "test-ID")
-	assert.Nil(t, err)
-	err = tx.Commit()
-	assert.Nil(t, err)
-	// Get the default experiment ID
-	defaultExperimentId, err := defaultExperimentStore.GetDefaultExperimentId()
-	assert.Nil(t, err)
-	assert.Equal(t, "", defaultExperimentId)
+// 	// Initialize for the first time
+// 	err := defaultExperimentStore.initializeDefaultExperimentTable()
+// 	assert.Nil(t, err)
+// 	// Set the default experiment ID
+// 	err = defaultExperimentStore.SetDefaultExperimentId("test-ID")
+// 	assert.Nil(t, err)
+// 	// Clear the default experiment ID. This requires a transaction.
+// 	tx, _ := db.Begin()
+// 	err = defaultExperimentStore.UnsetDefaultExperimentIdIfIdMatches(tx, "test-ID")
+// 	assert.Nil(t, err)
+// 	err = tx.Commit()
+// 	assert.Nil(t, err)
+// 	// Get the default experiment ID
+// 	defaultExperimentId, err := defaultExperimentStore.GetDefaultExperimentId()
+// 	assert.Nil(t, err)
+// 	assert.Equal(t, "", defaultExperimentId)
 
-	db.Close()
-}
+// 	db.Close()
+// }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	workflowapi "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
-	"github.com/ghodss/yaml"
+	// workflowapi "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
+	// "github.com/ghodss/yaml"
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
@@ -33,14 +33,14 @@ func toDateTimeTestOnly(timeInSec int64) strfmt.DateTime {
 	return result
 }
 
-func toWorkflowTestOnly(workflow string) *workflowapi.Workflow {
-	var result workflowapi.Workflow
-	err := yaml.Unmarshal([]byte(workflow), &result)
-	if err != nil {
-		return nil
-	}
-	return &result
-}
+// func toWorkflowTestOnly(workflow string) *workflowapi.Workflow {
+// 	var result workflowapi.Workflow
+// 	err := yaml.Unmarshal([]byte(workflow), &result)
+// 	if err != nil {
+// 		return nil
+// 	}
+// 	return &result
+// }
 
 func NewHTTPRuntime(clientConfig clientcmd.ClientConfig, debug bool) (
 	*httptransport.Runtime, error) {

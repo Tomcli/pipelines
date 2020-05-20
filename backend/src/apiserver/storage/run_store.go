@@ -21,7 +21,7 @@ import (
 	"github.com/pkg/errors"
 
 	sq "github.com/Masterminds/squirrel"
-	workflowapi "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
+	// workflowapi "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	"github.com/golang/glog"
 
 	api "github.com/kubeflow/pipelines/backend/api/go_client"
@@ -582,7 +582,7 @@ func (s *RunStore) TerminateRun(runId string) error {
 		UPDATE run_details
 		SET Conditions = "Terminating"
 		WHERE UUID = ? AND (Conditions = ? OR Conditions = ? OR Conditions = ?)`,
-		runId, string(workflowapi.NodeRunning), string(workflowapi.NodePending), "")
+		runId, string("Running"), string("Pending"), "")
 
 	if err != nil {
 		return util.NewInternalServerError(err,

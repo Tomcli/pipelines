@@ -14,38 +14,38 @@
 
 package model
 
-import (
-	"github.com/kubeflow/pipelines/backend/src/apiserver/common"
-	"github.com/stretchr/testify/assert"
-	"testing"
-)
+// import (
+// 	"github.com/kubeflow/pipelines/backend/src/apiserver/common"
+// 	"github.com/stretchr/testify/assert"
+// 	"testing"
+// )
 
-func TestGetNamespaceFromResourceReferencesModel(t *testing.T) {
-	references := []*ResourceReference{
-		{
-			ReferenceType: common.Experiment,
-			ReferenceUUID: "123",
-			ReferenceName: "123",
-			Relationship:  common.Creator,
-		},
-		{
-			ReferenceType: common.Namespace,
-			ReferenceName: "ns",
-			ReferenceUUID: "ns",
-			Relationship:  common.Creator,
-		},
-	}
-	namespace := GetNamespaceFromModelResourceReferences(references)
-	assert.Equal(t, "ns", namespace)
+// func TestGetNamespaceFromResourceReferencesModel(t *testing.T) {
+// 	references := []*ResourceReference{
+// 		{
+// 			ReferenceType: common.Experiment,
+// 			ReferenceUUID: "123",
+// 			ReferenceName: "123",
+// 			Relationship:  common.Creator,
+// 		},
+// 		{
+// 			ReferenceType: common.Namespace,
+// 			ReferenceName: "ns",
+// 			ReferenceUUID: "ns",
+// 			Relationship:  common.Creator,
+// 		},
+// 	}
+// 	namespace := GetNamespaceFromModelResourceReferences(references)
+// 	assert.Equal(t, "ns", namespace)
 
-	references = []*ResourceReference{
-		{
-			ReferenceType: common.Experiment,
-			ReferenceUUID: "123",
-			ReferenceName: "123",
-			Relationship:  common.Creator,
-		},
-	}
-	namespace = GetNamespaceFromModelResourceReferences(references)
-	assert.Equal(t, "", namespace)
-}
+// 	references = []*ResourceReference{
+// 		{
+// 			ReferenceType: common.Experiment,
+// 			ReferenceUUID: "123",
+// 			ReferenceName: "123",
+// 			Relationship:  common.Creator,
+// 		},
+// 	}
+// 	namespace = GetNamespaceFromModelResourceReferences(references)
+// 	assert.Equal(t, "", namespace)
+// }

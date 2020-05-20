@@ -1,4 +1,4 @@
-ARG BAZEL_IMAGE=l.gcr.io/google/bazel:0.24.0
+ARG BAZEL_IMAGE=golang:1.13.0
 FROM $BAZEL_IMAGE as builder
 
 RUN apt-get update && \
@@ -11,17 +11,19 @@ ARG google_application_credentials
 ARG use_remote_build=false
 
 # RUN bazel build -c opt --action_env=PATH --define=grpc_no_ares=true backend/src/apiserver:apiserver
-RUN if [ "$use_remote_build" = "true" ]; then \
-    echo "Using remote build execution ..." && \
-    printf "%s" "$google_application_credentials"  > /credentials.json && \
-    bazel --bazelrc=tools/bazel_builder/bazelrc \
-      build -c opt backend/src/apiserver:apiserver --config=remote \
-      --google_credentials=/credentials.json; \
-  else \
-    echo "Using local build execution..." && \
-    bazel --bazelrc=tools/bazel_builder/bazelrc \
-      build -c opt backend/src/apiserver:apiserver; \
-  fi
+# RUN if [ "$use_remote_build" = "true" ]; then \
+#     echo "Using remote build execution ..." && \
+#     printf "%s" "$google_application_credentials"  > /credentials.json && \
+#     bazel --bazelrc=tools/bazel_builder/bazelrc \
+#       build -c opt backend/src/apiserver:apiserver --config=remote \
+#       --google_credentials=/credentials.json; \
+#   else \
+#     echo "Using local build execution..." && \
+#     bazel --bazelrc=tools/bazel_builder/bazelrc \
+#       build -c opt backend/src/apiserver:apiserver; \
+#   fi
+RUN mkdir -p /go/src/github.com/kubeflow/pipelines/bazel-bin/backend/src/apiserver/
+RUN go build -o /go/src/github.com/kubeflow/pipelines/bazel-bin/backend/src/apiserver/apiserver ./backend/src/apiserver
 
 # Compile
 FROM python:3.5 as compiler
@@ -59,7 +61,7 @@ RUN line="import kfp;kfp.components.default_base_image_or_builder='gcr.io/google
     python3 "$pipeline"; \
     done
 
-FROM debian:stretch
+FROM golang:1.13.0
 
 ARG COMMIT_SHA=unknown
 ENV COMMIT_SHA=${COMMIT_SHA}
@@ -68,7 +70,7 @@ WORKDIR /bin
 
 COPY third_party/license.txt /bin/license.txt
 COPY --from=builder /go/src/github.com/kubeflow/pipelines/bazel-bin/backend/src/apiserver/  /usr/local/apiserver
-RUN cp /usr/local/apiserver/linux_$(dpkg --print-architecture)_stripped/apiserver /bin/apiserver && \
+RUN cp /usr/local/apiserver/apiserver /bin/apiserver && \
     rm -rf /usr/local/apiserver
 COPY backend/src/apiserver/config/ /config
 
