@@ -206,27 +206,36 @@ func PatchPipelineDefaultParameter(text string) (string, error) {
 func OverrideParameterWithSystemDefault(workflow util.Workflow, apiRun *api.Run) error {
 	// Patch the default value to workflow spec.
 	if servercommon.GetBoolConfigWithDefault(HasDefaultBucketEnvVar, false) {
-		patchedSlice := make([]wfv1.Parameter, 0)
-		for _, currentParam := range workflow.Spec.Arguments.Parameters {
-			if currentParam.Value != nil {
-				desiredValue, err := PatchPipelineDefaultParameter(*currentParam.Value)
+		patchedSlice := make([]wfv1.Param, 0)
+		for _, currentParam := range workflow.Spec.Params {
+			if currentParam.Value.StringVal != "" {
+				desiredValue, err := PatchPipelineDefaultParameter(currentParam.Value.StringVal)
 				if err != nil {
 					return fmt.Errorf("failed to patch default value to pipeline. Error: %v", err)
 				}
-				patchedSlice = append(patchedSlice, wfv1.Parameter{
-					Name:  currentParam.Name,
-					Value: util.StringPointer(desiredValue),
-				})
-			} else if currentParam.Default != nil {
-				desiredValue, err := PatchPipelineDefaultParameter(*currentParam.Default)
-				if err != nil {
-					return fmt.Errorf("failed to patch default value to pipeline. Error: %v", err)
-				}
-				patchedSlice = append(patchedSlice, wfv1.Parameter{
-					Name:  currentParam.Name,
-					Value: util.StringPointer(desiredValue),
+				patchedSlice = append(patchedSlice, wfv1.Param{
+					Name: currentParam.Name,
+					Value: wfv1.ArrayOrString{
+						Type:      "string",
+						StringVal: *util.StringPointer(desiredValue),
+					},
 				})
 			}
+			// Tekton doesn't have system default
+			//
+			// } else if currentParam.Default != nil {
+			// 	desiredValue, err := PatchPipelineDefaultParameter(*currentParam.Default)
+			// 	if err != nil {
+			// 		return fmt.Errorf("failed to patch default value to pipeline. Error: %v", err)
+			// 	}
+			// 	patchedSlice = append(patchedSlice, wfv1.Param{
+			// 		Name: currentParam.Name,
+			// 		Value: wfv1.ArrayOrString{
+			// 			Type:      "string",
+			// 			StringVal: *util.StringPointer(desiredValue),
+			// 		},
+			// 	})
+			// }
 		}
 		workflow.Spec.Params = patchedSlice
 
