@@ -121,15 +121,17 @@ func toParametersMap(apiParams []*api.Parameter) map[string]string {
 }
 
 func formulateRetryWorkflow(wf *util.Workflow) (*util.Workflow, []string, error) {
-	switch wf.Spec.Status {
-	case "Failed", "Error":
-		break
-	default:
-		return nil, nil, util.NewBadRequestError(errors.New("workflow cannot be retried"), "Workflow must be Failed/Error to retry")
+	if len(wf.Status.Status.Conditions) > 0 {
+		switch wf.Status.Status.Conditions[0].Type {
+		case "Failed", "Error":
+			break
+		default:
+			return nil, nil, util.NewBadRequestError(errors.New("workflow cannot be retried"), "Workflow must be Failed/Error to retry")
+		}
 	}
 
 	newWF := wf.DeepCopy()
-	// // Delete/reset fields which indicate workflow completed
+	// Delete/reset fields which indicate workflow completed
 	// delete(newWF.Labels, common.LabelKeyCompleted)
 	// // Delete/reset fields which indicate workflow is finished being persisted to the database
 	// delete(newWF.Labels, util.LabelKeyWorkflowPersistedFinalState)
