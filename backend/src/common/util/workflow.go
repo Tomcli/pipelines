@@ -155,7 +155,12 @@ func (w *Workflow) FinishedAt() int64 {
 }
 
 func (w *Workflow) Condition() string {
-	return string(w.Spec.Status)
+	glog.Errorf("status: %v", w.Status)
+	if len(w.Status.Status.Conditions) > 0 {
+		return string(w.Status.Status.Conditions[0].Type)
+	} else {
+		return ""
+	}
 }
 
 func (w *Workflow) ToStringForStore() string {
@@ -193,31 +198,13 @@ func (w *Workflow) OverrideName(name string) {
 
 // SetAnnotations sets annotations on all templates in a Workflow
 func (w *Workflow) SetAnnotationsToAllTemplates(key string, value string) {
-	// if len(w.Spec.PipelineSpec) == 0 {
-	// 	return
-	// }
-	// for index, _ := range w.Spec.PipelineSpec {
-	// 	if w.Spec.PipelineSpec[index].Metadata.Annotations == nil {
-	// 		w.Spec.PipelineSpec[index].Metadata.Annotations = make(map[string]string)
-	// 	}
-	// 	w.Spec.PipelineSpec[index].Metadata.Annotations[key] = value
-	// }
+	w.ObjectMeta.Annotations[key] = value
 	return
 }
 
 // SetLabels sets labels on all templates in a Workflow
 func (w *Workflow) SetLabelsToAllTemplates(key string, value string) {
-	// if len(w.Spec.PipelineSpec) == 0 {
-	// 	return
-	// }
-	// for index, _ := range w.Spec.PipelineSpec {
-	// 	if w.Spec.PipelineSpec[index].Metadata.Labels == nil {
-	// 		w.Spec.PipelineSpec[index].Metadata.Labels = make(map[string]string)
-	// 	}
-	// 	if w.Spec.PipelineSpec[index].Metadata.Labels[key] != value {
-	// 		w.Spec.PipelineSpec[index].Metadata.Labels[key] = value
-	// 	}
-	// }
+	w.ObjectMeta.Labels[key] = value
 	return
 }
 
@@ -290,8 +277,10 @@ func (w *Workflow) FindObjectStoreArtifactKeyOrEmpty(nodeID string, artifactName
 
 // IsInFinalState whether the workflow is in a final state.
 func (w *Workflow) IsInFinalState() bool {
-	if w.Spec.Status == "Succeeded" || w.Spec.Status == "Failed" {
-		return true
+	if len(w.Status.Status.Conditions) > 0 {
+		if w.Status.Status.Conditions[0].Type == "Succeeded" || w.Status.Status.Conditions[0].Type == "Failed" {
+			return true
+		}
 	}
 	return false
 }
