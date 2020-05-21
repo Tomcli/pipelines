@@ -155,9 +155,10 @@ func (w *Workflow) FinishedAt() int64 {
 }
 
 func (w *Workflow) Condition() string {
-	glog.Errorf("status: %v", w.Status)
-	if len(w.Status.Status.Conditions) > 0 {
-		return string(w.Status.Status.Conditions[0].Type)
+	glog.Infof("test")
+	glog.Infof("status: %v", w.PipelineRun)
+	if len(w.PipelineRun.Status.Status.Conditions) > 0 {
+		return string(w.PipelineRun.Status.Status.Conditions[0].Type)
 	} else {
 		return ""
 	}
@@ -198,13 +199,13 @@ func (w *Workflow) OverrideName(name string) {
 
 // SetAnnotations sets annotations on all templates in a Workflow
 func (w *Workflow) SetAnnotationsToAllTemplates(key string, value string) {
-	w.ObjectMeta.Annotations[key] = value
+	// w.PipelineRun.ObjectMeta.Annotations[key] = value
 	return
 }
 
 // SetLabels sets labels on all templates in a Workflow
 func (w *Workflow) SetLabelsToAllTemplates(key string, value string) {
-	w.ObjectMeta.Labels[key] = value
+	// w.PipelineRun.ObjectMeta.Labels[key] = value
 	return
 }
 
@@ -277,8 +278,8 @@ func (w *Workflow) FindObjectStoreArtifactKeyOrEmpty(nodeID string, artifactName
 
 // IsInFinalState whether the workflow is in a final state.
 func (w *Workflow) IsInFinalState() bool {
-	if len(w.Status.Status.Conditions) > 0 {
-		if w.Status.Status.Conditions[0].Type == "Succeeded" || w.Status.Status.Conditions[0].Type == "Failed" {
+	if len(w.PipelineRun.Status.Status.Conditions) > 0 {
+		if w.PipelineRun.Status.Status.Conditions[0].Type == "Succeeded" || w.PipelineRun.Status.Status.Conditions[0].Type == "Failed" {
 			return true
 		}
 	}
