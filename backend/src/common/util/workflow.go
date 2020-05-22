@@ -155,10 +155,10 @@ func (w *Workflow) FinishedAt() int64 {
 }
 
 func (w *Workflow) Condition() string {
-	glog.Infof("test")
-	glog.Infof("status: %v", w.PipelineRun)
-	if len(w.PipelineRun.Status.Status.Conditions) > 0 {
-		return string(w.PipelineRun.Status.Status.Conditions[0].Type)
+	workflow, _ := json.Marshal(w.Status.Status.Conditions)
+	glog.Infof(string(workflow))
+	if len(w.Status.Status.Conditions) > 0 {
+		return string(w.Status.Status.Conditions[0].Reason)
 	} else {
 		return ""
 	}
@@ -278,8 +278,8 @@ func (w *Workflow) FindObjectStoreArtifactKeyOrEmpty(nodeID string, artifactName
 
 // IsInFinalState whether the workflow is in a final state.
 func (w *Workflow) IsInFinalState() bool {
-	if len(w.PipelineRun.Status.Status.Conditions) > 0 {
-		if w.PipelineRun.Status.Status.Conditions[0].Type == "Succeeded" || w.PipelineRun.Status.Status.Conditions[0].Type == "Failed" {
+	if len(w.Status.Status.Conditions) > 0 {
+		if w.Status.Status.Conditions[0].Reason == "Succeeded" || w.Status.Status.Conditions[0].Reason == "Failed" {
 			return true
 		}
 	}

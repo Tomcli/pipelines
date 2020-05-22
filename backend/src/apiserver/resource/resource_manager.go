@@ -389,8 +389,10 @@ func (r *ResourceManager) CreateRun(apiRun *api.Run) (*model.RunDetail, error) {
 		return nil, err
 	}
 
-	// Create argo workflow CRD resource
+	// Create Tekton pipelineRun CRD resource
 	newWorkflow, err := r.getWorkflowClient(namespace).Create(workflow.Get())
+	wfs, _ := json.Marshal(newWorkflow)
+	glog.Infof(string(wfs))
 	if err != nil {
 		return nil, util.NewInternalServerError(err, "Failed to create a workflow for (%s)", workflow.Name)
 	}
