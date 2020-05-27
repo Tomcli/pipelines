@@ -14,48 +14,48 @@
 
 package storage
 
-// import (
-// 	"testing"
+import (
+	"testing"
 
-// 	"github.com/stretchr/testify/assert"
-// )
+	"github.com/stretchr/testify/assert"
+)
 
-// func TestInitializeDBStatusTable(t *testing.T) {
-// 	db := NewFakeDbOrFatal()
-// 	defer db.Close()
-// 	dBStatusStore := NewDBStatusStore(db)
+func TestInitializeDBStatusTable(t *testing.T) {
+	db := NewFakeDbOrFatal()
+	defer db.Close()
+	dBStatusStore := NewDBStatusStore(db)
 
-// 	// Initialize for the first time
-// 	err := dBStatusStore.InitializeDBStatusTable()
-// 	assert.Nil(t, err)
-// 	// Initialize again should be no-op and no error
-// 	err = dBStatusStore.InitializeDBStatusTable()
-// 	assert.Nil(t, err)
-// 	haveSamplesLoaded, err := dBStatusStore.HaveSamplesLoaded()
-// 	assert.Nil(t, err)
-// 	assert.False(t, haveSamplesLoaded)
+	// Initialize for the first time
+	err := dBStatusStore.InitializeDBStatusTable()
+	assert.Nil(t, err)
+	// Initialize again should be no-op and no error
+	err = dBStatusStore.InitializeDBStatusTable()
+	assert.Nil(t, err)
+	haveSamplesLoaded, err := dBStatusStore.HaveSamplesLoaded()
+	assert.Nil(t, err)
+	assert.False(t, haveSamplesLoaded)
 
-// 	db.Close()
-// 	err = dBStatusStore.InitializeDBStatusTable()
-// 	assert.NotNil(t, err)
-// }
+	db.Close()
+	err = dBStatusStore.InitializeDBStatusTable()
+	assert.NotNil(t, err)
+}
 
-// func TestMarkSampleLoaded(t *testing.T) {
-// 	db := NewFakeDbOrFatal()
-// 	defer db.Close()
-// 	dBStatusStore := NewDBStatusStore(db)
+func TestMarkSampleLoaded(t *testing.T) {
+	db := NewFakeDbOrFatal()
+	defer db.Close()
+	dBStatusStore := NewDBStatusStore(db)
 
-// 	// Initialize for the first time
-// 	err := dBStatusStore.InitializeDBStatusTable()
-// 	assert.Nil(t, err)
-// 	// Mark the samples as loaded
-// 	err = dBStatusStore.MarkSampleLoaded()
-// 	assert.Nil(t, err)
-// 	haveSamplesLoaded, err := dBStatusStore.HaveSamplesLoaded()
-// 	assert.Nil(t, err)
-// 	assert.True(t, haveSamplesLoaded)
+	// Initialize for the first time
+	err := dBStatusStore.InitializeDBStatusTable()
+	assert.Nil(t, err)
+	// Mark the samples as loaded
+	err = dBStatusStore.MarkSampleLoaded()
+	assert.Nil(t, err)
+	haveSamplesLoaded, err := dBStatusStore.HaveSamplesLoaded()
+	assert.Nil(t, err)
+	assert.True(t, haveSamplesLoaded)
 
-// 	db.Close()
-// 	err = dBStatusStore.MarkSampleLoaded()
-// 	assert.NotNil(t, err)
-// }
+	db.Close()
+	err = dBStatusStore.MarkSampleLoaded()
+	assert.NotNil(t, err)
+}
