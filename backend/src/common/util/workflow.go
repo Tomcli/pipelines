@@ -155,8 +155,6 @@ func (w *Workflow) FinishedAt() int64 {
 }
 
 func (w *Workflow) Condition() string {
-	workflow, _ := json.Marshal(w.Status.Status.Conditions)
-	glog.Infof(string(workflow))
 	if len(w.Status.Status.Conditions) > 0 {
 		return string(w.Status.Status.Conditions[0].Reason)
 	} else {
