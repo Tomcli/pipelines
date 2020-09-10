@@ -13,12 +13,11 @@ inputs:
   - {name: Autoscaling Target,              type: String, default: '0',        description: 'Autoscaling Target Number'}
   - {name: KFServing Endpoint,              type: String, default: '', description: 'KFServing remote deployer API endpoint'}
   - {name: Service Account,                 type: String, default: '', description: 'Model Service Account'}
-  - {name: Istio Sidecar,                   type: String, default: 'True',     description: 'Whether to enable istio sidecar injection'}
 outputs:
   - {name: Service Endpoint URI, type: String,                      description: 'URI of the deployed prediction service..'}
 implementation:
   container:
-    image: aipipeline/kfserving-component:v0.3.0
+    image: aipipeline/kfserving-component:v0.4.0
     command: ['python']
     args: [
       -u, kfservingdeployer.py,
@@ -34,6 +33,5 @@ implementation:
       --kfserving-endpoint,       {inputValue: KFServing Endpoint},
       --autoscaling-target,       {inputValue: Autoscaling Target},
       --service-account,          {inputValue: Service Account},
-      --istio-sidecar,            {inputValue: Istio Sidecar},
       --output-path,              {outputPath: Service Endpoint URI}
     ]
