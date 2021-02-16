@@ -63,7 +63,7 @@ func main() {
 	// fmt.Println(a)
 	workflow, err := CompilePipelineSpec(spec, deploymentConfig)
 	if err != nil {
-		glog.Fatalf("Failed to compile pipeline IR to argo workflow: %v", err)
+		glog.Fatalf("Failed to compile pipeline IR to Tekton workflow: %v", err)
 	}
 	workflowInJson, err := json.MarshalIndent(workflow, "", "  ")
 	if err != nil {

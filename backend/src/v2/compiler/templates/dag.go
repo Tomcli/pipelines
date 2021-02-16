@@ -17,11 +17,11 @@ package templates
 import (
 	"fmt"
 
-	workflowapi "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	"github.com/golang/protobuf/jsonpb"
 	pb "github.com/kubeflow/pipelines/api/v2alpha1/go"
 	"github.com/kubeflow/pipelines/backend/src/v2/compiler/util"
 	"github.com/pkg/errors"
+	workflowapi "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 )
 
 const (
@@ -45,16 +45,14 @@ type taskData struct {
 	// we may need more stuff put here
 }
 
-func Dag(args *DagArgs) (*workflowapi.Template, error) {
+func Dag(args *DagArgs) (*workflowapi.PipelineSpec, error) {
 	// convenient local variables
 	tasks := args.Tasks
 	deploymentConfig := args.DeploymentConfig
 	executors := deploymentConfig.GetExecutors()
 
-	var dag workflowapi.Template
-	dag.Name = getUniqueDagName()
-	dag.DAG = &workflowapi.DAGTemplate{}
-	dag.Inputs.Parameters = []workflowapi.Parameter{
+	var dag workflowapi.PipelineSpec
+	dag.Params = []workflowapi.ParamSpec{
 		{Name: DagParamContextName},
 	}
 	taskMap := make(map[string]*taskData)
@@ -80,7 +78,7 @@ func Dag(args *DagArgs) (*workflowapi.Template, error) {
 		if executorSpec == nil {
 			return nil, errors.Errorf("Executor with label '%v' cannot be found in deployment config", executorLabel)
 		}
-		var executor workflowapi.Template
+		var executor workflowapi.PipelineTask
 		executor.Name = util.SanitizeK8sName(executorLabel)
 
 		argoTaskName := util.SanitizeK8sName(task.GetTaskInfo().GetName())
@@ -123,19 +121,17 @@ func Dag(args *DagArgs) (*workflowapi.Template, error) {
 			(*dependencies)[index] = sanitizedDependencyName
 		}
 
-		dag.DAG.Tasks = append(
-			dag.DAG.Tasks,
-			workflowapi.DAGTask{
-				Name:         argoTaskName,
-				Template:     args.ExecutorTemplateName,
-				Dependencies: *dependencies,
-				Arguments: workflowapi.Arguments{
-					Parameters: []workflowapi.Parameter{
-						{Name: ExecutorParamTaskSpec, Value: &taskSpecInJson},
-						{Name: ExecutorParamContextName, Value: &parentContextNameValue},
-						{Name: ExecutorParamExecutorSpec, Value: &executorSpecInJson},
-						{Name: ExecutorParamOutputsSpec, Value: &outputsSpecInJson},
-					},
+		dag.Tasks = append(
+			dag.Tasks,
+			workflowapi.PipelineTask{
+				Name:     argoTaskName,
+				TaskRef:  &workflowapi.TaskRef{Name: args.ExecutorTemplateName},
+				RunAfter: *dependencies,
+				Params: []workflowapi.Param{
+					{Name: ExecutorParamTaskSpec, Value: workflowapi.ArrayOrString{Type: workflowapi.ParamTypeString, StringVal: taskSpecInJson}},
+					{Name: ExecutorParamContextName, Value: workflowapi.ArrayOrString{Type: workflowapi.ParamTypeString, StringVal: parentContextNameValue}},
+					{Name: ExecutorParamExecutorSpec, Value: workflowapi.ArrayOrString{Type: workflowapi.ParamTypeString, StringVal: executorSpecInJson}},
+					{Name: ExecutorParamOutputsSpec, Value: workflowapi.ArrayOrString{Type: workflowapi.ParamTypeString, StringVal: outputsSpecInJson}},
 				},
 			})
 	}

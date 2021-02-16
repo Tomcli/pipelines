@@ -14,11 +14,11 @@
 
 package templates
 
-import (
-	workflowapi "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
-	"github.com/kubeflow/pipelines/backend/src/v2/common"
-	apiv1 "k8s.io/api/core/v1"
-)
+// import (
+// 	"github.com/kubeflow/pipelines/backend/src/v2/common"
+// 	workflowapi "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+// 	apiv1 "k8s.io/api/core/v1"
+// )
 
 // TODO(Bobgy): make image configurable
 const (
@@ -42,93 +42,93 @@ const (
 	executorInternalArtifactParameters = paramPrefixKfpInternal + "parameters"
 )
 
-func Executor(executorDriverTemplateName string, executorPublisherTemplateName string) []*workflowapi.Template {
-	// TODO(Bobgy): Move dummy template generation out as a separate file.
-	var dummy workflowapi.Template
-	dummy.Name = templateNameDummy
-	// The actual container definition will be injected by pod spec patch
-	entrypointVolumeName := "kfp-entrypoint"
-	dummy.Volumes = []apiv1.Volume{{
-		Name: entrypointVolumeName,
-		VolumeSource: apiv1.VolumeSource{
-			EmptyDir: &apiv1.EmptyDirVolumeSource{},
-		},
-	}}
-	dummy.Container = &apiv1.Container{
-		Image: "dummy",
-		VolumeMounts: []apiv1.VolumeMount{{
-			Name:      entrypointVolumeName,
-			MountPath: common.ExecutorEntrypointVolumePath,
-			ReadOnly:  true,
-		}},
-	}
-	// The entrypoint init container copies the entrypoint binary into a volume shared with executor container.
-	dummy.InitContainers = []workflowapi.UserContainer{{
-		Container: apiv1.Container{
-			Name:    "entrypoint-init",
-			Image:   entrypointImageFull,
-			Command: []string{"cp"},
-			Args:    []string{"/bin/kfp-entrypoint", common.ExecutorEntrypointPath},
-			VolumeMounts: []apiv1.VolumeMount{{
-				Name:      entrypointVolumeName,
-				MountPath: common.ExecutorEntrypointVolumePath,
-			}},
-		},
-	}}
-	dummy.PodSpecPatch = "{{inputs.parameters." + executorInternalParamPodSpecPatch + "}}"
-	dummy.Inputs.Parameters = []workflowapi.Parameter{
-		{Name: executorInternalParamPodSpecPatch},
-	}
-	dummy.Outputs.Parameters = []workflowapi.Parameter{
-		{Name: executorInternalParamPodName, Value: &argoVariablePodName},
-	}
-	dummy.Outputs.Artifacts = []workflowapi.Artifact{
-		{Name: executorInternalArtifactParameters, Path: common.ExecutorOutputPathParameters, Optional: true},
-	}
+// func Executor(executorDriverTemplateName string, executorPublisherTemplateName string) []*workflowapi.Template {
+// 	// TODO(Bobgy): Move dummy template generation out as a separate file.
+// 	var dummy workflowapi.Template
+// 	dummy.Name = templateNameDummy
+// 	// The actual container definition will be injected by pod spec patch
+// 	entrypointVolumeName := "kfp-entrypoint"
+// 	dummy.Volumes = []apiv1.Volume{{
+// 		Name: entrypointVolumeName,
+// 		VolumeSource: apiv1.VolumeSource{
+// 			EmptyDir: &apiv1.EmptyDirVolumeSource{},
+// 		},
+// 	}}
+// 	dummy.Container = &apiv1.Container{
+// 		Image: "dummy",
+// 		VolumeMounts: []apiv1.VolumeMount{{
+// 			Name:      entrypointVolumeName,
+// 			MountPath: common.ExecutorEntrypointVolumePath,
+// 			ReadOnly:  true,
+// 		}},
+// 	}
+// 	// The entrypoint init container copies the entrypoint binary into a volume shared with executor container.
+// 	dummy.InitContainers = []workflowapi.UserContainer{{
+// 		Container: apiv1.Container{
+// 			Name:    "entrypoint-init",
+// 			Image:   entrypointImageFull,
+// 			Command: []string{"cp"},
+// 			Args:    []string{"/bin/kfp-entrypoint", common.ExecutorEntrypointPath},
+// 			VolumeMounts: []apiv1.VolumeMount{{
+// 				Name:      entrypointVolumeName,
+// 				MountPath: common.ExecutorEntrypointVolumePath,
+// 			}},
+// 		},
+// 	}}
+// 	dummy.PodSpecPatch = "{{inputs.parameters." + executorInternalParamPodSpecPatch + "}}"
+// 	dummy.Inputs.Parameters = []workflowapi.Parameter{
+// 		{Name: executorInternalParamPodSpecPatch},
+// 	}
+// 	dummy.Outputs.Parameters = []workflowapi.Parameter{
+// 		{Name: executorInternalParamPodName, Value: &argoVariablePodName},
+// 	}
+// 	dummy.Outputs.Artifacts = []workflowapi.Artifact{
+// 		{Name: executorInternalArtifactParameters, Path: common.ExecutorOutputPathParameters, Optional: true},
+// 	}
 
-	driverTaskName := "driver"
-	executorTaskName := "executor"
-	driverType := "EXECUTOR"
+// 	driverTaskName := "driver"
+// 	executorTaskName := "executor"
+// 	driverType := "EXECUTOR"
 
-	var executorDag workflowapi.Template
-	executorDag.Name = TemplateNameExecutor
-	executorDag.Inputs.Parameters = []workflowapi.Parameter{
-		{Name: ExecutorParamContextName},
-		{Name: ExecutorParamTaskSpec},
-		{Name: ExecutorParamExecutorSpec},
-		{Name: ExecutorParamOutputsSpec},
-	}
-	taskSpecInJson := "{{inputs.parameters." + ExecutorParamTaskSpec + "}}"
-	executorSpecInJson := "{{inputs.parameters." + ExecutorParamExecutorSpec + "}}"
-	podSpecPatchValue := "{{tasks." + driverTaskName + ".outputs.parameters." + executorInternalParamPodSpecPatch + "}}"
-	parentContextNameValue := "{{inputs.parameters." + ExecutorParamContextName + "}}"
-	executorDag.DAG = &workflowapi.DAGTemplate{}
-	executorDag.DAG.Tasks = []workflowapi.DAGTask{
-		{
-			Name:     driverTaskName,
-			Template: executorDriverTemplateName,
-			Arguments: workflowapi.Arguments{
-				Parameters: []workflowapi.Parameter{
-					{Name: DriverParamTaskSpec, Value: &taskSpecInJson},
-					{Name: DriverParamDriverType, Value: &driverType},
-					{Name: DriverParamParentContextName, Value: &parentContextNameValue},
-					{Name: DriverParamExecutorSpec, Value: &executorSpecInJson},
-				},
-			},
-		},
-		{
-			Name:         executorTaskName,
-			Template:     dummy.Name,
-			Dependencies: []string{driverTaskName},
-			Arguments: workflowapi.Arguments{
-				Parameters: []workflowapi.Parameter{
-					{Name: executorInternalParamPodSpecPatch, Value: &podSpecPatchValue},
-				},
-			},
-		},
-	}
-	return []*workflowapi.Template{
-		&executorDag,
-		&dummy,
-	}
-}
+// 	var executorDag workflowapi.Template
+// 	executorDag.Name = TemplateNameExecutor
+// 	executorDag.Inputs.Parameters = []workflowapi.Parameter{
+// 		{Name: ExecutorParamContextName},
+// 		{Name: ExecutorParamTaskSpec},
+// 		{Name: ExecutorParamExecutorSpec},
+// 		{Name: ExecutorParamOutputsSpec},
+// 	}
+// 	taskSpecInJson := "{{inputs.parameters." + ExecutorParamTaskSpec + "}}"
+// 	executorSpecInJson := "{{inputs.parameters." + ExecutorParamExecutorSpec + "}}"
+// 	podSpecPatchValue := "{{tasks." + driverTaskName + ".outputs.parameters." + executorInternalParamPodSpecPatch + "}}"
+// 	parentContextNameValue := "{{inputs.parameters." + ExecutorParamContextName + "}}"
+// 	executorDag.DAG = &workflowapi.DAGTemplate{}
+// 	executorDag.DAG.Tasks = []workflowapi.DAGTask{
+// 		{
+// 			Name:     driverTaskName,
+// 			Template: executorDriverTemplateName,
+// 			Arguments: workflowapi.Arguments{
+// 				Parameters: []workflowapi.Parameter{
+// 					{Name: DriverParamTaskSpec, Value: &taskSpecInJson},
+// 					{Name: DriverParamDriverType, Value: &driverType},
+// 					{Name: DriverParamParentContextName, Value: &parentContextNameValue},
+// 					{Name: DriverParamExecutorSpec, Value: &executorSpecInJson},
+// 				},
+// 			},
+// 		},
+// 		{
+// 			Name:         executorTaskName,
+// 			Template:     dummy.Name,
+// 			Dependencies: []string{driverTaskName},
+// 			Arguments: workflowapi.Arguments{
+// 				Parameters: []workflowapi.Parameter{
+// 					{Name: executorInternalParamPodSpecPatch, Value: &podSpecPatchValue},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	return []*workflowapi.Template{
+// 		&executorDag,
+// 		&dummy,
+// 	}
+// }
